@@ -1,0 +1,338 @@
+
+              E commerce website
+
+          Front end - using angular
+
+1.  Create angular project- ng new project name
+2.  Run angular project- ng serve --open  //  ng s -o 
+3.  Add bootstrap,font awesome,google fonts in index.js
+4.  Lazy load the commonly used Html pages inside a module 
+           ng g m products --route products --module app.module 
+5.  Add router-outlet selector inside the route component html page.(app.component.html)
+6.  Create component should be lazy loaded in the products module.
+          - all products - ng g c products/all-products
+          - Cart -  ng g c products/carts
+          - wishlist -  ng g c products/wishlist
+          - page-not-found - ng g c page-not-found
+7.  Set up the paths for each component
+          - To redirect  from localhost:4200 to specific route
+8. Design the component
+
+24. create angular service 
+          ng g s products/api
+
+25. import HttpClientmodule in products module
+    products.module.ts->import HttpClientmodule
+          import {HttpClientmodule} from '@angular/common/http';
+26.Dependency inject HttpClient class in api service ts file
+         constructor(private http:HttpClient)
+
+27.call api in all product component
+
+
+    ( dependency inject 
+      all-products.ts->
+      constructor(private api:ApiService)      
+
+      above constructor->
+        //to hold all products
+        allProducts:any=[]
+
+)
+
+      
+
+28. 
+ import productmodule in app module
+  copy name ProductsModule from product.module.ts and paste in app.module.ts
+
+
+
+29. to search
+     cart->open terminal-> ng g p products/pipes/filter
+
+    filter.pipe.ts->
+
+    export class FilterPipe implements PipeTransform {
+    transform(allProducts:[], searcKey:string, propName:string): any[] {
+    const result:any=[]
+    if(!allProducts||searcKey==''|| propName==''){
+      return allProducts
+    }
+    allProducts.forEach((product:any)=>{
+      if(product[propName].trim().toLowerCase().includes(searcKey.toLowerCase())){
+        result.push(product)
+      }
+    })
+    return result;
+    }
+    }
+
+----------------------------------
+allproducts.html
+                 | filter:'shirt':'title'
+
+
+
+---------------------------------
+ api service.ts->
+ searchKey=new BehaviorSubject('')
+ 
+above contsructor
+
+--------------------------------
+header.ts->
+ constructor(private api:ApiService)
+--------------------------------
+header.ts->
+this.api.searchKey.next(searcKey)
+
+----------------------------------
+allproducts.ts->
+before constructor
+ searchTerm:string=''
+----------------------------------
+allproducts.ts->
+
+ this.api.searchKey.subscribe(
+      (data:any)=>{
+        this.searchTerm=data
+      }
+    )
+
+    in ngoninit.that is;
+  ngOnInit(): void {
+    this.api.getAllProducts().subscribe(
+      (data:any)=>{
+        this.allProducts=data.result
+      }
+    )
+
+    this.api.searchKey.subscribe(
+      (data:any)=>{
+        this.searchTerm=data
+      }
+    )
+
+  }
+
+
+-----------------------------------
+allProducts.html->
+
+ *ngFor="let product of allProducts |filter:searchTerm:'title' "
+-----------------------------------
+apiservice.ts->
+//addtowishlist
+
+ //addToWishlist
+  addToWishlist(product:any){
+    const body={
+      id: product.id,
+      title:product.title,
+      price:product.price,
+      description: product.description,
+      image:product.image,
+    }
+    return this.http.post('http://localhost:3000/add-to-wishlist',body)
+  }
+
+------------------------------------
+allproducts.html->
+
+button (click)="addToWishlist(product)"
+
+-------------------------------------
+allproducts.ts->
+
+addToWishlist(product:any){
+    this.api.addToWishlist(product)
+    .subscribe(
+      (result:any)=>{
+        alert(result.message)
+      },
+      (result:any)=>{
+        alert(result.error.message)
+      }
+      )
+    }
+-------------------------------------------
+backend.....
+
+a)
+
+
+------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+             Mongo db
+9. store all products details in mongodb as a data base
+
+
+         Node and Express js
+     Create back end using- node and express js
+
+
+10. Create a folder for server
+11. Create a package.json file, 
+            cmnd : npm init
+12. Create index.js
+13. Install express 
+            cmpd :  npm i express
+14. Import express inside index.js file
+            const express = require('express')
+
+15. Using express create a server application
+            const app = express()
+
+16. Set up the port for server application
+            app.listen(3000, () => {
+            console.log('Server started at 3000');
+            })
+
+17. Use json parser in server application
+            //to parse json data
+            app.use(express.json())
+
+18. Install cors protocol inside server
+            npm i cors
+
+19. Import cors in index.js
+            const cors = require('cors')
+
+20. Using cors specify origin to server app
+            app.use(cors({
+            origin:'http://localhost:4200'
+            }))
+        
+
+21. Install mongoose to establish connection between server and mongodb
+             npm i mongoose
+
+22.  Using mongoose establish connection between server and mongodb
+
+            22.1-create a service folder 
+            22.2-ceeate db.js file 
+
+            22.3-import mongoose in db.js file
+                  const mongoose = require('mongoose')
+
+            22.4- Using mongoose,define the connection string
+                   
+                   mongoose.connect('mongodb://localhost:27017/sCart',()=>{
+                   console.log('MongoDb connection successfully');
+                   })
+
+            22.4- define model to products  (copy from mongodb and edit)
+
+                     const Product= mongoose.model('Product',{
+                      id: Number,
+                      title:String,
+                      price:Number,
+                      description: String,
+                      category: String,
+                      image:String,
+                      rating: {
+                      rate: Number,
+                      count:Number
+                      }
+                      })
+                    
+             -export model so that it can be used in another files
+                           module.exports={
+                           Product
+                           }
+
+
+      23-Resolving Api in index.js
+           //get all products
+           app.get('/all-products',(req,res)=>{
+           console.log('Inside getAllProducts function');
+           dataService.getAllProducts()
+          .then((result)=>{
+           res.status(result.statusCode).json(result)
+          })
+          })
+
+
+      -define dataService
+      const dataService= require('./services/dataService')
+
+
+      -
+      //1
+const db=require('./db')
+
+//2. getAllProducts
+const getAllProducts=()=>{
+   return db.Product.find()
+   .then((data)=>{
+    if(data){
+      return{
+        statusCode:200,
+        result:data
+      }
+    }
+    else{
+      return{
+        statusCode:404,
+        message:'Failed to fetch data from database'
+      }
+    }
+   })
+}
+
+
+//3.export
+module.exports={
+  getAllProducts
+}
+
+--------------
+backend
+a)
+
+
+//9.add-to-wishlist
+app.post('/add-to-wishlist',(req,res)=>{
+  console.log('inside add-to-wishlist function');
+  console.log(req.body);
+})
+------------------------------------
+dataservice->
+
+const addToWishlist=(id,title,price,description,image)=>{
+  
+}
+
+--------------------------------------
+db.js->
+const Wishlist= mongoose.model('Wishlist',{
+  id: Number,
+  title:String,
+  price:Number,
+  description: String,
+  image:String,
+})
+
+module.exports={
+  Product,
+  Wishlist
+}
+
+--------------------------------------------

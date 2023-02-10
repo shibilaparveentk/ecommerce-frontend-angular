@@ -1,0 +1,48 @@
+<!--when wishlist is empty-->
+<div class="container mt-5 border border-light p-5" *ngIf="eMsg">
+  <div class="row text-center">
+    <div class="col">
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQupRBiq3OB9OufRvPIYgCuWMeUckJ5gQOAtno1z1MpqTDA9ceqfLPV-ZJ68ijNX00j_w8&usqp=CAU"
+        alt="no image" class="ig">
+      <h3 class="mt-2">Your Wishlist is empty</h3>
+      <a routerLink="/" class="btn btn-primary mt-2">Add to Wish List</a>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Section-->
+<section class="py-5">
+  <div class="container px-4 px-lg-5 mt-5">
+    <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-3 justify-content-center ">
+      <div class="col mb-5" *ngFor="let product of wishList">
+        <div class="card h-100 align-items-center p-4">
+          <!-- Product image-->
+          <img class="card-img-top" [src]="product.image" alt="no image" />
+          <!-- Product details-->
+          <div class="card-body p-4">
+            <div class="text-center">
+              <!-- Product name-->
+              <h5 class="fw-bolder">{{product.title}}</h5>
+              <!-- Product price-->
+              ${{product.price}}
+            </div>
+          </div>
+          <!-- Product actions-->
+          <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+            <button (click)="deleteFromWishlist(product)" style="float:left;"
+              class="btn btn-outline-danger mt-auto me-5">
+              <i class="fa fa-trash"></i>
+            </button>
+
+            <button (click)="addToCart(product)" style="float:right;" class="btn btn-outline-success mt-auto">
+              <i class="fa-solid fa-cart-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
